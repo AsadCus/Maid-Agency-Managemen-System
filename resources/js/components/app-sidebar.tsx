@@ -10,7 +10,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { branch, dashboard, financialYear, master, user } from '@/routes';
+import { admin, customer, sales, supplier } from '@/routes/user';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
@@ -21,6 +22,50 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Master',
+        href: master(),
+        icon: LayoutGrid,
+        subItems: [
+            {
+                title: 'User',
+                href: user(),
+                icon: LayoutGrid,
+                subItems: [
+                    {
+                        title: 'Admin',
+                        href: admin(),
+                        icon: LayoutGrid,
+                    },
+                    {
+                        title: 'Sales',
+                        href: sales(),
+                        icon: LayoutGrid,
+                    },
+                    {
+                        title: 'Customer',
+                        href: customer(),
+                        icon: LayoutGrid,
+                    },
+                    {
+                        title: 'Supplier',
+                        href: supplier(),
+                        icon: LayoutGrid,
+                    },
+                ],
+            },
+            {
+                title: 'Branch',
+                href: branch(),
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Financial Year',
+                href: financialYear(),
+                icon: LayoutGrid,
+            },
+        ],
     },
 ];
 
