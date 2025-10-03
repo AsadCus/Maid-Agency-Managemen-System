@@ -159,7 +159,10 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     </Link>
                                 </SidebarMenuButton>
 
-                                <CollapsibleTrigger asChild>
+                                <CollapsibleTrigger
+                                    asChild
+                                    className="group-data-[state=collapsed]/sidebar:hidden"
+                                >
                                     <button
                                         type="button"
                                         className="ml-2 rounded p-1 hover:bg-accent"

@@ -9,6 +9,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { branch, dashboard, financialYear, master, user } from '@/routes';
 import { admin, customer, sales, supplier } from '@/routes/user';
@@ -83,8 +84,15 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { state } = useSidebar();
+
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar
+            collapsible="icon"
+            variant="inset"
+            data-state={state}
+            className="group/sidebar"
+        >
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
