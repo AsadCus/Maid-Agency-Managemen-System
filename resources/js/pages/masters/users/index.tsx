@@ -1,7 +1,8 @@
 import { Calendar } from '@/components/ui/calendar';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { master, user } from '@/routes';
+import { master } from '@/routes';
+import { user } from '@/routes/master';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import * as React from 'react';

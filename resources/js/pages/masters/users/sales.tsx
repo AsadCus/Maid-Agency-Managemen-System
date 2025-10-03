@@ -1,17 +1,18 @@
 import { Calendar } from '@/components/ui/calendar';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { master, user } from '@/routes';
-import { sales } from '@/routes/user';
+import { master } from '@/routes';
+import { user } from '@/routes/master';
+import { sales } from '@/routes/master/user';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import * as React from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-            title: 'Master',
-            href: master().url,
-        },
+        title: 'Master',
+        href: master().url,
+    },
     {
         title: 'User',
         href: user().url,

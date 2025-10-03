@@ -13,40 +13,56 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Masters
-    Route::get('master', function () {
-        return Inertia::render('masters/index');
-    })->name('master');
-
-    // Master - Users
-    Route::prefix('user')->group(function () {
+    Route::prefix('master')->group(function () {
         Route::get('/', function () {
-            return Inertia::render('masters/users/index');
-        })->name('user');
+            return Inertia::render('masters/index');
+        })->name('master');
 
-        Route::get('admin', function () {
-            return Inertia::render('masters/users/admin');
-        })->name('user.admin');
+        // Master - Users
+        Route::prefix('user')->group(function () {
+            Route::get('/', function () {
+                return Inertia::render('masters/users/index');
+            })->name('master.user');
 
-        Route::get('sales', function () {
-            return Inertia::render('masters/users/sales');
-        })->name('user.sales');
+            Route::get('admin', function () {
+                return Inertia::render('masters/users/admin');
+            })->name('master.user.admin');
 
-        Route::get('supplier', function () {
-            return Inertia::render('masters/users/supplier');
-        })->name('user.supplier');
+            Route::get('sales', function () {
+                return Inertia::render('masters/users/sales');
+            })->name('master.user.sales');
 
-        Route::get('customer', function () {
-            return Inertia::render('masters/users/customer');
-        })->name('user.customer');
+            Route::get('supplier', function () {
+                return Inertia::render('masters/users/supplier');
+            })->name('master.user.supplier');
+
+            Route::get('customer', function () {
+                return Inertia::render('masters/users/customer');
+            })->name('master.user.customer');
+        });
+
+        Route::get('branch', function () {
+            return Inertia::render('masters/branch');
+        })->name('master.branch');
+
+        Route::get('financial-year', function () {
+            return Inertia::render('masters/financial-year');
+        })->name('master.financial-year');
     });
 
-    Route::get('branch', function () {
-        return Inertia::render('masters/branch');
-    })->name('branch');
+    // Supplier
+    Route::prefix('supplier')->group(function () {
+        Route::get('/', function () {
+            return Inertia::render('supplier/index');
+        })->name('supplier');
+    });
 
-    Route::get('financial-year', function () {
-        return Inertia::render('masters/financial-year');
-    })->name('financial-year');
+    // Maid
+    Route::prefix('maid')->group(function () {
+        Route::get('/', function () {
+            return Inertia::render('maid/index');
+        })->name('maid');
+    });
 });
 
 require __DIR__ . '/settings.php';

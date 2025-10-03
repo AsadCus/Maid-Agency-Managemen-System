@@ -4,12 +4,19 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
     SidebarGroup,
     SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarMenuSub,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -17,13 +24,13 @@ import { ChevronRight } from 'lucide-react';
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const page = usePage();
+    const { state } = useSidebar();
 
     const renderSubMenu = (subItems: NavItem[]) => {
         return (
             <SidebarMenuSub>
                 {subItems.map((subItem) => {
-                    const hasNested =
-                        subItem.subItems && subItem.subItems.length > 0;
+                    const hasNested = (subItem.subItems?.length ?? 0) > 0;
                     const isActive = page.url.startsWith(
                         typeof subItem.href === 'string'
                             ? subItem.href
@@ -36,7 +43,6 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                 : child.href.url,
                         ),
                     );
-                    const initiallyOpen = isActive || subActive;
 
                     if (!hasNested) {
                         return (
@@ -58,7 +64,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                     return (
                         <Collapsible
                             key={subItem.title}
-                            defaultOpen={initiallyOpen}
+                            defaultOpen={isActive || subActive}
                             className="group/collapsible-item"
                         >
                             <SidebarMenuItem className="flex items-center">
@@ -117,7 +123,6 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                 : subItem.href.url,
                         ),
                     );
-                    const initiallyOpen = isActive || subActive;
 
                     if (!hasSubItems) {
                         return (
@@ -136,10 +141,50 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                         );
                     }
 
+                    if (state === 'collapsed') {
+                        return (
+                            <SidebarMenuItem key={item.title}>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <SidebarMenuButton
+                                            isActive={isActive || subActive}
+                                            tooltip={{ children: item.title }}
+                                        >
+                                            {item.icon && <item.icon />}
+                                        </SidebarMenuButton>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        side="right"
+                                        align="start"
+                                    >
+                                        {(item.subItems ?? []).map(
+                                            (subItem) => (
+                                                <DropdownMenuItem
+                                                    key={subItem.title}
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={subItem.href}
+                                                        prefetch
+                                                    >
+                                                        {subItem.icon && (
+                                                            <subItem.icon className="mr-2" />
+                                                        )}
+                                                        {subItem.title}
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            ),
+                                        )}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </SidebarMenuItem>
+                        );
+                    }
+
                     return (
                         <Collapsible
                             key={item.title}
-                            defaultOpen={initiallyOpen}
+                            defaultOpen={isActive || subActive}
                             className="group/collapsible"
                         >
                             <SidebarMenuItem className="flex items-center">
@@ -159,10 +204,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     </Link>
                                 </SidebarMenuButton>
 
-                                <CollapsibleTrigger
-                                    asChild
-                                    className="group-data-[state=collapsed]/sidebar:hidden"
-                                >
+                                <CollapsibleTrigger asChild>
                                     <button
                                         type="button"
                                         className="ml-2 rounded p-1 hover:bg-accent"

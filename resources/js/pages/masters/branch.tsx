@@ -1,16 +1,17 @@
 import { Calendar } from '@/components/ui/calendar';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { branch, master } from '@/routes';
+import { master } from '@/routes';
+import { branch } from '@/routes/master';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import * as React from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-            title: 'Master',
-            href: master().url,
-        },
+        title: 'Master',
+        href: master().url,
+    },
     {
         title: 'Branch',
         href: branch().url,
@@ -25,7 +26,7 @@ export default function Branch() {
             <Head title="Branch" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border py-5">
+                    <div className="relative overflow-hidden rounded-xl border border-sidebar-border/70 py-5 dark:border-sidebar-border">
                         <Calendar
                             mode="single"
                             selected={date}

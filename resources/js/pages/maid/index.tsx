@@ -1,34 +1,24 @@
 import { Calendar } from '@/components/ui/calendar';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { master } from '@/routes';
-import { user } from '@/routes/master';
-import { supplier } from '@/routes/master/user';
+import { maid } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import * as React from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Master',
-        href: master().url,
-    },
-    {
-        title: 'User',
-        href: user().url,
-    },
-    {
-        title: 'Supplier',
-        href: supplier().url,
+        title: 'Maid',
+        href: maid().url,
     },
 ];
 
-export default function Supplier() {
+export default function Maid() {
     const [date, setDate] = React.useState<Date | undefined>(new Date());
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Supplier" />
+            <Head title="Maid" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     <div className="relative overflow-hidden rounded-xl border border-sidebar-border/70 py-5 dark:border-sidebar-border">

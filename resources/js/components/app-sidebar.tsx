@@ -9,10 +9,15 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    useSidebar,
 } from '@/components/ui/sidebar';
-import { branch, dashboard, financialYear, master, user } from '@/routes';
-import { admin, customer, sales, supplier } from '@/routes/user';
+import { dashboard, maid, master, supplier } from '@/routes';
+import { branch, financialYear, user } from '@/routes/master';
+import {
+    admin,
+    customer,
+    sales,
+    supplier as userSupplier,
+} from '@/routes/master/user';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
@@ -51,7 +56,7 @@ const mainNavItems: NavItem[] = [
                     },
                     {
                         title: 'Supplier',
-                        href: supplier(),
+                        href: userSupplier(),
                         icon: LayoutGrid,
                     },
                 ],
@@ -67,6 +72,16 @@ const mainNavItems: NavItem[] = [
                 icon: LayoutGrid,
             },
         ],
+    },
+    {
+        title: 'Supplier',
+        href: supplier(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Maid',
+        href: maid(),
+        icon: LayoutGrid,
     },
 ];
 
@@ -84,15 +99,8 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { state } = useSidebar();
-
     return (
-        <Sidebar
-            collapsible="icon"
-            variant="inset"
-            data-state={state}
-            className="group/sidebar"
-        >
+        <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
