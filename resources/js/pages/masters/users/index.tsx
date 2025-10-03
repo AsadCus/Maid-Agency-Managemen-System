@@ -29,10 +29,6 @@ type User = {
 
 const userColumns: ColumnDef<User, any>[] = [
     {
-        accessorKey: 'id',
-        header: 'ID',
-    },
-    {
         accessorKey: 'name',
         header: 'Name',
     },
@@ -54,9 +50,6 @@ const userData: User[] = [
 
 export default function User() {
     const [date, setDate] = React.useState<Date | undefined>(new Date());
-    const handleSelection = (sel) => {
-        console.log('Rows selected:', sel);
-    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -80,11 +73,7 @@ export default function User() {
                     </div>
                 </div>
                 <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 px-5 py-3 md:min-h-min dark:border-sidebar-border">
-                    <DataTable
-                        columns={userColumns}
-                        data={userData}
-                        onRowSelectionChange={handleSelection}
-                    />
+                    <DataTable columns={userColumns} data={userData} />
                 </div>
             </div>
         </AppLayout>

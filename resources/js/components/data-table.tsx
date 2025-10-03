@@ -1,16 +1,15 @@
-'use client';
-
 import {
+    ColumnDef,
+    ColumnFiltersState,
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    RowSelectionState,
+    SortingState,
     useReactTable,
-    type ColumnDef,
-    type RowSelectionState,
-    type SortingState,
-    type VisibilityState,
+    VisibilityState,
 } from '@tanstack/react-table';
 import * as React from 'react';
 
@@ -31,68 +30,66 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-
-import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
+import { DataTablePagination } from './data-table-pagination';
 
 interface DataTableProps<TData, TValue = unknown> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    initialSorting?: SortingState;
     initialColumnVisibility?: VisibilityState;
-    onRowSelectionChange?: (selection: RowSelectionState) => void;
 }
 
 export function DataTable<TData, TValue = unknown>({
     columns,
     data,
-    initialSorting = [],
-    initialColumnVisibility = {},
-    onRowSelectionChange,
+    initialColumnVisibility,
 }: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = React.useState<SortingState>(initialSorting);
     const [columnVisibility, setColumnVisibility] =
-        React.useState<VisibilityState>(initialColumnVisibility);
-    const [globalFilter, setGlobalFilter] = React.useState('');
+        React.useState<VisibilityState>(initialColumnVisibility ?? {});
+    const [columnFilters, setColumnFilters] =
+        React.useState<ColumnFiltersState>([]);
+    const [sorting, setSorting] = React.useState<SortingState>([]);
     const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
         {},
     );
+    const [globalFilter, setGlobalFilter] = React.useState('');
 
     const table = useReactTable({
         data,
         columns,
         state: {
-            sorting,
             columnVisibility,
-            globalFilter,
+            columnFilters,
+            sorting,
             rowSelection,
+            globalFilter,
         },
-        onSortingChange: setSorting,
         onColumnVisibilityChange: setColumnVisibility,
+        onColumnFiltersChange: setColumnFilters,
+        onSortingChange: setSorting,
+        onRowSelectionChange: setRowSelection,
         onGlobalFilterChange: setGlobalFilter,
-        onRowSelectionChange: (sel) => {
-            setRowSelection(sel);
-            if (onRowSelectionChange) onRowSelectionChange(sel);
-        },
         getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
     });
 
     return (
         <div className="space-y-4">
-            {/* Toolbar */}
             <div className="flex items-center space-x-2">
                 <Input
-                    placeholder="Filter..."
-                    value={globalFilter}
+                    placeholder="Search..."
+                    value={globalFilter ?? ''}
                     onChange={(e) => setGlobalFilter(e.target.value)}
                     className="max-w-sm"
                 />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline">Columns</Button>
+                        <Button variant="outline" size="sm">
+                            View
+                        </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         {table
@@ -102,14 +99,11 @@ export function DataTable<TData, TValue = unknown>({
                                 <DropdownMenuCheckboxItem
                                     key={col.id}
                                     checked={col.getIsVisible()}
-                                    onCheckedChange={(val) =>
-                                        col.toggleVisibility(!!val)
+                                    onCheckedChange={(value) =>
+                                        col.toggleVisibility(!!value)
                                     }
                                 >
                                     {col.id}
-                                    {!col.getIsVisible() && (
-                                        <EyeOff className="ml-2 h-4 w-4" />
-                                    )}
                                 </DropdownMenuCheckboxItem>
                             ))}
                     </DropdownMenuContent>
@@ -117,39 +111,44 @@ export function DataTable<TData, TValue = unknown>({
             </div>
 
             {/* Table */}
-            <div className="rounded-md border">
+            <div className="overflow-hidden rounded-md border">
                 <Table>
                     <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    const sorted = header.column.getIsSorted();
-                                    return (
-                                        <TableHead
-                                            key={header.id}
-                                            className="cursor-pointer select-none"
-                                            onClick={header.column.getToggleSortingHandler()}
-                                        >
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                      header.column.columnDef
-                                                          .header,
-                                                      header.getContext(),
-                                                  )}
+                        {table.getHeaderGroups().map((hg) => (
+                            <TableRow key={hg.id}>
+                                {hg.headers.map((header) => (
+                                    <TableHead
+                                        key={header.id}
+                                        className={
+                                            header.column.getCanSort()
+                                                ? 'cursor-pointer select-none'
+                                                : ''
+                                        }
+                                        onClick={header.column.getToggleSortingHandler()}
+                                    >
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                  header.column.columnDef
+                                                      .header,
+                                                  header.getContext(),
+                                              )}
 
-                                            {sorted === 'asc' && (
+                                        {{
+                                            asc: (
                                                 <ArrowUp className="ml-1 inline h-4 w-4" />
-                                            )}
-                                            {sorted === 'desc' && (
+                                            ),
+                                            desc: (
                                                 <ArrowDown className="ml-1 inline h-4 w-4" />
-                                            )}
-                                            {!sorted && (
+                                            ),
+                                        }[
+                                            header.column.getIsSorted() as string
+                                        ] ??
+                                            (header.column.getCanSort() ? (
                                                 <ChevronsUpDown className="ml-1 inline h-4 w-4 text-muted-foreground" />
-                                            )}
-                                        </TableHead>
-                                    );
-                                })}
+                                            ) : null)}
+                                    </TableHead>
+                                ))}
                             </TableRow>
                         ))}
                     </TableHeader>
@@ -182,35 +181,7 @@ export function DataTable<TData, TValue = unknown>({
                 </Table>
             </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                    {table.getFilteredRowModel().rows.length} rows
-                </div>
-
-                <div className="flex items-center space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        Previous
-                    </Button>
-                    <span className="text-sm">
-                        Page {table.getState().pagination.pageIndex + 1} of{' '}
-                        {table.getPageCount()}
-                    </span>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        Next
-                    </Button>
-                </div>
-            </div>
+            <DataTablePagination table={table} />
         </div>
     );
 }
