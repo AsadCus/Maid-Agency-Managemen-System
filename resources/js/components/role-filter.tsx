@@ -19,11 +19,11 @@ export function RoleFilter<TData>({ table }: RoleFilterProps<TData>) {
             value={(column?.getFilterValue() as string) ?? 'all'}
             onValueChange={(val) => column?.setFilterValue(val)}
         >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filter by role" />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="Admin">Admin</SelectItem>
                 <SelectItem value="Sales">Sales</SelectItem>
                 <SelectItem value="Customer">Customer</SelectItem>

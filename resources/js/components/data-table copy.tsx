@@ -1,10 +1,11 @@
-import {
-    ChevronDownIcon,
-    Columns3Icon,
-    RefreshCcwIcon,
-    SearchIcon,
-} from 'lucide-react';
+'use client';
+
 import { useState } from 'react';
+
+import { DownloadIcon, FileSpreadsheetIcon, FileTextIcon } from 'lucide-react';
+
+import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 import type {
     ColumnDef,
@@ -21,11 +22,11 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
@@ -40,6 +41,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+
+import { cn } from '@/lib/utils';
 
 const data: Payment[] = [
     {
@@ -77,13 +80,34 @@ const data: Payment[] = [
         status: 'failed',
         email: 'bent@hotmail.com',
     },
+    {
+        id: '6',
+        name: 'Alice Cooper',
+        amount: 321,
+        status: 'processing',
+        email: 'alice@email.com',
+    },
+    {
+        id: '7',
+        name: 'Bob Johnson',
+        amount: 789,
+        status: 'success',
+        email: 'bob.j@company.com',
+    },
+    {
+        id: '8',
+        name: 'Carol Williams',
+        amount: 456,
+        status: 'processing',
+        email: 'carol.w@domain.org',
+    },
 ];
 
 export type Payment = {
     id: string;
     name: string;
     amount: number;
-    status: 'pending' | 'processing' | 'success' | 'failed';
+    status: 'processing' | 'success' | 'failed';
     email: string;
 };
 
@@ -113,8 +137,8 @@ export const columns: ColumnDef<Payment>[] = [
         enableHiding: false,
     },
     {
-        header: 'Name',
         accessorKey: 'name',
+        header: 'Name',
         cell: ({ row }) => (
             <div className="font-medium">{row.getValue('name')}</div>
         ),
@@ -122,9 +146,30 @@ export const columns: ColumnDef<Payment>[] = [
     {
         accessorKey: 'status',
         header: 'Status',
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue('status')}</div>
-        ),
+        cell: ({ row }) => {
+            const status = row.getValue('status') as string;
+
+            const styles = {
+                success:
+                    'bg-green-600/10 text-green-600 focus-visible:ring-green-600/20 dark:bg-green-400/10 dark:text-green-400 dark:focus-visible:ring-green-400/40 [a&]:hover:bg-green-600/5 dark:[a&]:hover:bg-green-400/5',
+                failed: 'bg-destructive/10 [a&]:hover:bg-destructive/5 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 text-destructive',
+                processing:
+                    'bg-amber-600/10 text-amber-600 focus-visible:ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:focus-visible:ring-amber-400/40 [a&]:hover:bg-amber-600/5 dark:[a&]:hover:bg-amber-400/5',
+            }[status];
+
+            return (
+                <Badge
+                    className={
+                        (cn(
+                            'rounded-full border-none focus-visible:outline-none',
+                        ),
+                        styles)
+                    }
+                >
+                    {row.getValue('status')}
+                </Badge>
+            );
+        },
     },
     {
         accessorKey: 'email',
@@ -149,14 +194,14 @@ export const columns: ColumnDef<Payment>[] = [
     },
 ];
 
-const DataTableColumnsVisibilityDemo = () => {
-    const [searchQuery, setSearchQuery] = useState<string>('');
+const DataTableWithExportDemo = () => {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         {},
     );
     const [rowSelection, setRowSelection] = useState({});
+    const [globalFilter, setGlobalFilter] = useState('');
 
     const table = useReactTable({
         data,
@@ -169,80 +214,144 @@ const DataTableColumnsVisibilityDemo = () => {
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
+        onGlobalFilterChange: setGlobalFilter,
+        globalFilterFn: 'includesString',
         state: {
             sorting,
             columnFilters,
             columnVisibility,
             rowSelection,
+            globalFilter,
         },
     });
 
+    const exportToCSV = () => {
+        const selectedRows = table.getSelectedRowModel().rows;
+
+        const dataToExport =
+            selectedRows.length > 0
+                ? selectedRows.map((row) => row.original)
+                : table.getFilteredRowModel().rows.map((row) => row.original);
+
+        const csv = Papa.unparse(dataToExport, {
+            header: true,
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute(
+            'download',
+            `payments-export-${new Date().toISOString().split('T')[0]}.csv`,
+        );
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const exportToExcel = () => {
+        const selectedRows = table.getSelectedRowModel().rows;
+
+        const dataToExport =
+            selectedRows.length > 0
+                ? selectedRows.map((row) => row.original)
+                : table.getFilteredRowModel().rows.map((row) => row.original);
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Payments');
+
+        const cols = [
+            { wch: 10 },
+            { wch: 20 },
+            { wch: 15 },
+            { wch: 25 },
+            { wch: 15 },
+        ];
+
+        worksheet['!cols'] = cols;
+
+        XLSX.writeFile(
+            workbook,
+            `payments-export-${new Date().toISOString().split('T')[0]}.xlsx`,
+        );
+    };
+
+    const exportToJSON = () => {
+        const selectedRows = table.getSelectedRowModel().rows;
+
+        const dataToExport =
+            selectedRows.length > 0
+                ? selectedRows.map((row) => row.original)
+                : table.getFilteredRowModel().rows.map((row) => row.original);
+
+        const json = JSON.stringify(dataToExport, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute(
+            'download',
+            `payments-export-${new Date().toISOString().split('T')[0]}.json`,
+        );
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="w-full">
-            <div className="py-4">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className="w-full max-w-3xs justify-between"
-                        >
-                            <span className="flex items-center gap-2">
-                                <Columns3Icon />
-                                Columns
-                            </span>{' '}
-                            <ChevronDownIcon className="ml-3" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <div className="relative">
-                            <Input
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-8"
-                                placeholder="Search"
-                                onKeyDown={(e) => e.stopPropagation()}
-                            />
-                            <SearchIcon className="absolute inset-y-0 left-2 my-auto h-4 w-4" />
-                        </div>
-                        <DropdownMenuSeparator />
-                        {table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column) => {
-                                if (
-                                    searchQuery &&
-                                    !column.id
-                                        .toLowerCase()
-                                        .includes(searchQuery.toLowerCase())
-                                ) {
-                                    return null;
-                                }
-
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) =>
-                                            column.toggleVisibility(!!value)
-                                        }
-                                        onSelect={(e) => e.preventDefault()}
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                );
-                            })}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={() => {
-                                table.resetColumnVisibility();
-                                setSearchQuery('');
-                            }}
-                        >
-                            <RefreshCcwIcon /> Reset
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+            <div className="flex justify-between gap-2 pb-4 max-sm:flex-col sm:items-center">
+                <div className="flex items-center space-x-2">
+                    <Input
+                        placeholder="Search all columns..."
+                        value={globalFilter ?? ''}
+                        onChange={(event) =>
+                            setGlobalFilter(String(event.target.value))
+                        }
+                        className="max-w-sm"
+                    />
+                </div>
+                <div className="flex items-center space-x-2">
+                    <div className="text-sm text-muted-foreground">
+                        {table.getSelectedRowModel().rows.length > 0 && (
+                            <span className="mr-2">
+                                {table.getSelectedRowModel().rows.length} of{' '}
+                                {table.getFilteredRowModel().rows.length} row(s)
+                                selected
+                            </span>
+                        )}
+                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                                <DownloadIcon className="mr-2 h-4 w-4" />
+                                Export
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={exportToCSV}>
+                                <FileTextIcon className="mr-2 h-4 w-4" />
+                                Export as CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={exportToExcel}>
+                                <FileSpreadsheetIcon className="mr-2 h-4 w-4" />
+                                Export as Excel
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={exportToJSON}>
+                                <FileTextIcon className="mr-2 h-4 w-4" />
+                                Export as JSON
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
             <div className="rounded-md border">
                 <Table>
@@ -298,10 +407,10 @@ const DataTableColumnsVisibilityDemo = () => {
                 </Table>
             </div>
             <p className="mt-4 text-center text-sm text-muted-foreground">
-                Data table column visibility
+                Data table with export functionality (CSV, Excel, JSON)
             </p>
         </div>
     );
 };
 
-export default DataTableColumnsVisibilityDemo;
+export default DataTableWithExportDemo;

@@ -1,22 +1,3 @@
-import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -39,20 +20,11 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import {
-    ArrowDown,
-    ArrowUp,
-    ChevronDownIcon,
-    ChevronsUpDown,
-    Columns3Icon,
-    RefreshCcwIcon,
-    Rows2Icon,
-    Rows3Icon,
-    Rows4Icon,
-    SearchIcon,
-} from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
+import { DataTableExport } from './data-table-export';
 import { DataTablePagination } from './data-table-pagination';
+import { DataTableSettings } from './data-table-settings';
 
 interface DataTableProps<TData, TValue = unknown> {
     columns: ColumnDef<TData, TValue>[];
@@ -89,6 +61,7 @@ export function DataTable<TData, TValue = unknown>({
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        globalFilterFn: 'includesString',
         state: {
             sorting,
             columnFilters,
@@ -101,7 +74,7 @@ export function DataTable<TData, TValue = unknown>({
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-2">
-                <Input
+                {/* <Input
                     placeholder="Search..."
                     value={globalFilter ?? ''}
                     onChange={(e) => setGlobalFilter(e.target.value)}
@@ -204,7 +177,21 @@ export function DataTable<TData, TValue = unknown>({
                     </SelectContent>
                 </Select>
 
-                {renderToolbar?.(table)}
+                {renderToolbar?.(table)} */}
+                <div className="flex w-full justify-between">
+                    <DataTableSettings
+                        table={table}
+                        globalFilter={globalFilter}
+                        setGlobalFilter={setGlobalFilter}
+                        density={density}
+                        setDensity={setDensity}
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        renderToolbar={renderToolbar}
+                    />
+
+                    <DataTableExport table={table} />
+                </div>
             </div>
 
             {/* Table */}
