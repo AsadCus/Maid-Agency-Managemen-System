@@ -1,3 +1,31 @@
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -11,59 +39,47 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import * as React from 'react';
-
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-
-import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
+    ArrowDown,
+    ArrowUp,
+    ChevronDownIcon,
+    ChevronsUpDown,
+    Columns3Icon,
+    RefreshCcwIcon,
+    Rows2Icon,
+    Rows3Icon,
+    Rows4Icon,
+    SearchIcon,
+} from 'lucide-react';
+import { useState } from 'react';
 import { DataTablePagination } from './data-table-pagination';
 
 interface DataTableProps<TData, TValue = unknown> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    initialColumnVisibility?: VisibilityState;
+    renderToolbar?: (
+        table: ReturnType<typeof useReactTable<TData>>,
+    ) => React.ReactNode;
 }
 
 export function DataTable<TData, TValue = unknown>({
     columns,
     data,
-    initialColumnVisibility,
+    renderToolbar,
 }: DataTableProps<TData, TValue>) {
-    const [columnVisibility, setColumnVisibility] =
-        React.useState<VisibilityState>(initialColumnVisibility ?? {});
-    const [columnFilters, setColumnFilters] =
-        React.useState<ColumnFiltersState>([]);
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         {},
     );
-    const [globalFilter, setGlobalFilter] = React.useState('');
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [density, setDensity] = useState<string>('standard');
 
     const table = useReactTable({
         data,
         columns,
-        state: {
-            columnVisibility,
-            columnFilters,
-            sorting,
-            rowSelection,
-            globalFilter,
-        },
         onColumnVisibilityChange: setColumnVisibility,
         onColumnFiltersChange: setColumnFilters,
         onSortingChange: setSorting,
@@ -73,46 +89,133 @@ export function DataTable<TData, TValue = unknown>({
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        state: {
+            sorting,
+            columnFilters,
+            columnVisibility,
+            rowSelection,
+            globalFilter,
+        },
     });
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
                 <Input
                     placeholder="Search..."
                     value={globalFilter ?? ''}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="max-w-sm"
+                    className="max-w-[200px]"
                 />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                            View
+                        <Button
+                            variant="outline"
+                            className="w-full max-w-[140px] justify-between"
+                        >
+                            <span className="flex items-center gap-2">
+                                <Columns3Icon />
+                                Columns
+                            </span>{' '}
+                            <ChevronDownIcon className="ml-3" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                        <div className="relative">
+                            <Input
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-8"
+                                placeholder="Search"
+                                onKeyDown={(e) => e.stopPropagation()}
+                            />
+                            <SearchIcon className="absolute inset-y-0 left-2 my-auto h-4 w-4" />
+                        </div>
+                        <DropdownMenuSeparator />
                         {table
                             .getAllColumns()
-                            .filter((col) => col.getCanHide())
-                            .map((col) => (
-                                <DropdownMenuCheckboxItem
-                                    key={col.id}
-                                    checked={col.getIsVisible()}
-                                    onCheckedChange={(value) =>
-                                        col.toggleVisibility(!!value)
-                                    }
-                                >
-                                    {col.id}
-                                </DropdownMenuCheckboxItem>
-                            ))}
+                            .filter((column) => column.getCanHide())
+                            .map((column) => {
+                                if (
+                                    searchQuery &&
+                                    !column.id
+                                        .toLowerCase()
+                                        .includes(searchQuery.toLowerCase())
+                                ) {
+                                    return null;
+                                }
+
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="capitalize"
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) =>
+                                            column.toggleVisibility(!!value)
+                                        }
+                                        onSelect={(e) => e.preventDefault()}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                );
+                            })}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            onClick={() => {
+                                table.resetColumnVisibility();
+                                setSearchQuery('');
+                            }}
+                        >
+                            <RefreshCcwIcon /> Reset
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+
+                <Select value={density} onValueChange={setDensity}>
+                    <SelectTrigger
+                        className="w-[140px]"
+                        aria-label="Density select"
+                    >
+                        <SelectValue placeholder="Density" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>Density</SelectLabel>
+                            <SelectItem value="compact">
+                                <div className="flex items-center gap-2">
+                                    <Rows4Icon className="h-4 w-4" />
+                                    Compact
+                                </div>
+                            </SelectItem>
+                            <SelectItem value="standard">
+                                <div className="flex items-center gap-2">
+                                    <Rows3Icon className="h-4 w-4" />
+                                    Standard
+                                </div>
+                            </SelectItem>
+                            <SelectItem value="flexible">
+                                <div className="flex items-center gap-2">
+                                    <Rows2Icon className="h-4 w-4" />
+                                    Flexible
+                                </div>
+                            </SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+
+                {renderToolbar?.(table)}
             </div>
 
             {/* Table */}
             <div className="overflow-hidden rounded-md border">
-                <Table>
+                <Table
+                    className={cn({
+                        '[&_td]:py-1 [&_th]:py-1': density === 'compact',
+                        '[&_td]:py-2 [&_th]:py-2': density === 'standard',
+                        '[&_td]:py-3 [&_th]:py-3': density === 'flexible',
+                    })}
+                >
                     <TableHeader>
                         {table.getHeaderGroups().map((hg) => (
                             <TableRow key={hg.id}>
@@ -133,7 +236,6 @@ export function DataTable<TData, TValue = unknown>({
                                                       .header,
                                                   header.getContext(),
                                               )}
-
                                         {{
                                             asc: (
                                                 <ArrowUp className="ml-1 inline h-4 w-4" />
@@ -156,7 +258,12 @@ export function DataTable<TData, TValue = unknown>({
                     <TableBody>
                         {table.getRowModel().rows.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id}>
+                                <TableRow
+                                    key={row.id}
+                                    data-state={
+                                        row.getIsSelected() && 'selected'
+                                    }
+                                >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
                                             {flexRender(
