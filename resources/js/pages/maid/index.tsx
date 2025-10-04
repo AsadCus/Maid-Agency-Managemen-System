@@ -59,7 +59,7 @@ export const columns: ColumnDef<schemaMaid>[] = [
     {
         id: 'age',
         header: 'Age',
-        meta: { exportable: true },
+        meta: { exportable: false },
         cell: ({ row }) => {
             const dob = row.original.date_of_birth;
             return <span>{calculateAge(dob)}</span>;

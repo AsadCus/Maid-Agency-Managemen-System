@@ -6,7 +6,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Table } from '@tanstack/react-table';
+import { Column, Row, Table } from '@tanstack/react-table';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {
@@ -23,19 +23,19 @@ interface DataTableExportProps<TData> {
 }
 
 export function DataTableExport<TData>({ table }: DataTableExportProps<TData>) {
-    const getDataToExport = () => {
-        const selectedRows = table.getSelectedRowModel().rows;
+    const getDataToExport = <TData,>(table: Table<TData>) => {
+        const selectedRows = table.getSelectedRowModel().rows as Row<TData>[];
         const rows =
             selectedRows.length > 0
-                ? selectedRows.map((row: any) => row.original)
-                : table
-                      .getFilteredRowModel()
-                      .rows.map((row: any) => row.original);
+                ? selectedRows.map((row) => row.original)
+                : (table.getFilteredRowModel().rows as Row<TData>[]).map(
+                      (row) => row.original,
+                  );
 
         const visibleColumns = table
             .getAllLeafColumns()
             .filter(
-                (col) =>
+                (col: Column<TData>) =>
                     col.getIsVisible() &&
                     col.columnDef.meta?.exportable !== false,
             );
@@ -50,10 +50,14 @@ export function DataTableExport<TData>({ table }: DataTableExportProps<TData>) {
             }
         });
 
-        const formattedRows = rows.map((row: any) => {
-            const filtered: Record<string, any> = {};
+        const formattedRows = rows.map((row) => {
+            const filtered: Record<string, unknown> = {};
             visibleColumns.forEach((col) => {
-                if (col.id) filtered[headers[col.id]] = row[col.id];
+                if (col.id) {
+                    filtered[headers[col.id]] = (
+                        row as Record<string, unknown>
+                    )[col.id];
+                }
             });
             return filtered;
         });
@@ -112,7 +116,7 @@ export function DataTableExport<TData>({ table }: DataTableExportProps<TData>) {
 
         const head = [Object.values(headers)];
 
-        const body = rows.map((row: any) => Object.values(row));
+        const body = rows.map((row) => Object.values(row));
 
         const doc = new jsPDF('l', 'pt', 'a4');
         doc.setFontSize(12);

@@ -1,4 +1,4 @@
-import { Table } from '@tanstack/react-table';
+import { Row, Table } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import { ActionType } from './action-column';
 import { DataTableExport } from './data-table-export';
@@ -15,7 +15,7 @@ interface DataTableToolbarProps<TData> {
     searchQuery: string;
     setSearchQuery: (value: string) => void;
     renderFilter?: (table: Table<TData>) => React.ReactNode;
-    onAction?: (action: ActionType, row?: any) => void;
+    onAction?: (action: ActionType, row?: Row<TData>) => void;
 }
 
 export function DataTableToolbar<TData>({
@@ -45,6 +45,7 @@ export function DataTableToolbar<TData>({
                     setSearchQuery={setSearchQuery}
                     renderFilter={renderFilter}
                 />
+
                 {(isFiltered || globalFilter) && (
                     <Button
                         variant="ghost"
@@ -57,6 +58,7 @@ export function DataTableToolbar<TData>({
                         <X />
                     </Button>
                 )}
+
                 {actions?.includes('add') && (
                     <Button onClick={() => onAction?.('add')}>Add</Button>
                 )}

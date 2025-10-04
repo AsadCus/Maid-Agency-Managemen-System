@@ -18,6 +18,7 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    Row,
     RowSelectionState,
     SortingState,
     useReactTable,
@@ -36,7 +37,7 @@ interface DataTableProps<TData, TValue = unknown> {
     renderFilter?: (
         table: ReturnType<typeof useReactTable<TData>>,
     ) => React.ReactNode;
-    onAction?: (action: ActionType, row?: any) => void;
+    onAction?: (action: ActionType, row?: Row<TData>) => void;
     initialState?: {
         columnFilters?: ColumnFiltersState;
         columnVisibility?: VisibilityState;
@@ -62,9 +63,13 @@ export function DataTable<TData, TValue = unknown>({
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [globalFilter, setGlobalFilter] = useState('');
     const [density, setDensity] = useState<string>('standard');
-    const includesValue: FilterFn<any> = (row, columnId, filterValue) => {
+    const includesValue: FilterFn<unknown> = (
+        row,
+        columnId,
+        filterValue: string[],
+    ) => {
         if (!filterValue || filterValue.length === 0) return true;
-        return filterValue.includes(row.getValue(columnId));
+        return filterValue.includes(row.getValue<string>(columnId));
     };
 
     const table = useReactTable({
