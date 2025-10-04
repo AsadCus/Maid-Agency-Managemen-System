@@ -8,7 +8,7 @@ import {
 import { Row } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 
-type ActionType = 'view' | 'edit' | 'delete';
+export type ActionType = 'add' | 'view' | 'edit' | 'delete';
 
 interface ActionColumnProps<TData> {
     row: Row<TData>;
@@ -18,7 +18,7 @@ interface ActionColumnProps<TData> {
 
 export function ActionColumn<TData>({
     row,
-    actions = ['view', 'edit', 'delete'],
+    actions = [],
     onAction,
 }: ActionColumnProps<TData>) {
     return (

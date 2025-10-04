@@ -24,7 +24,7 @@ import { ChevronRight } from 'lucide-react';
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const page = usePage();
-    const { state } = useSidebar();
+    const { state, isMobile } = useSidebar();
 
     const renderSubMenu = (subItems: NavItem[]) => {
         return (
@@ -141,7 +141,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                         );
                     }
 
-                    if (state === 'collapsed') {
+                    if (state === 'collapsed' && !isMobile) {
                         return (
                             <SidebarMenuItem key={item.title}>
                                 <DropdownMenu>

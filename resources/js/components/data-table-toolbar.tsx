@@ -1,11 +1,13 @@
 import { Table } from '@tanstack/react-table';
 import { X } from 'lucide-react';
+import { ActionType } from './action-column';
 import { DataTableExport } from './data-table-export';
 import { DataTableSettings } from './data-table-settings';
 import { Button } from './ui/button';
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>;
+    actions?: ActionType[];
     globalFilter: string;
     setGlobalFilter: (value: string) => void;
     density: string | undefined;
@@ -13,10 +15,12 @@ interface DataTableToolbarProps<TData> {
     searchQuery: string;
     setSearchQuery: (value: string) => void;
     renderFilter?: (table: Table<TData>) => React.ReactNode;
+    onAction?: (action: ActionType, row?: any) => void;
 }
 
 export function DataTableToolbar<TData>({
     table,
+    actions,
     globalFilter,
     setGlobalFilter,
     density,
@@ -24,6 +28,7 @@ export function DataTableToolbar<TData>({
     searchQuery,
     setSearchQuery,
     renderFilter,
+    onAction,
 }: DataTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -40,14 +45,20 @@ export function DataTableToolbar<TData>({
                     setSearchQuery={setSearchQuery}
                     renderFilter={renderFilter}
                 />
-                {isFiltered && (
+                {(isFiltered || globalFilter) && (
                     <Button
                         variant="ghost"
-                        onClick={() => table.resetColumnFilters()}
+                        onClick={() => {
+                            table.resetColumnFilters();
+                            setGlobalFilter('');
+                        }}
                     >
                         Reset
                         <X />
                     </Button>
+                )}
+                {actions?.includes('add') && (
+                    <Button onClick={() => onAction?.('add')}>Add</Button>
                 )}
             </div>
 

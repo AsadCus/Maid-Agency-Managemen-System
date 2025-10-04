@@ -130,7 +130,7 @@ export function DataTableSettings<TData>({
                                                     e.preventDefault()
                                                 }
                                             >
-                                                {column.id}
+                                                {column.id.replace(/_/g, ' ')}
                                             </DropdownMenuCheckboxItem>
                                         );
                                     })}

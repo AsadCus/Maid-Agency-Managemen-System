@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import {
     ColumnDef,
     ColumnFiltersState,
+    FilterFn,
     flexRender,
     getCoreRowModel,
     getFacetedRowModel,
@@ -24,42 +25,58 @@ import {
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
+import { ActionType } from './action-column';
 import { DataTablePagination } from './data-table-pagination';
 import { DataTableToolbar } from './data-table-toolbar';
 
 interface DataTableProps<TData, TValue = unknown> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
+    actions: ActionType[];
     renderFilter?: (
         table: ReturnType<typeof useReactTable<TData>>,
     ) => React.ReactNode;
+    onAction?: (action: ActionType, row?: any) => void;
+    initialState?: {
+        columnFilters?: ColumnFiltersState;
+        columnVisibility?: VisibilityState;
+    };
 }
 
 export function DataTable<TData, TValue = unknown>({
     columns,
     data,
+    actions,
     renderFilter,
+    onAction,
+    initialState,
 }: DataTableProps<TData, TValue>) {
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [sorting, setSorting] = useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+        initialState?.columnFilters ?? [],
+    );
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-        {},
+        initialState?.columnVisibility ?? {},
     );
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [globalFilter, setGlobalFilter] = useState('');
     const [density, setDensity] = useState<string>('standard');
+    const includesValue: FilterFn<any> = (row, columnId, filterValue) => {
+        if (!filterValue || filterValue.length === 0) return true;
+        return filterValue.includes(row.getValue(columnId));
+    };
 
     const table = useReactTable({
         data,
         columns,
+        filterFns: {
+            includesValue,
+        },
         state: {
             sorting,
             columnFilters,
-            columnVisibility: {
-                id: false,
-                ...columnVisibility,
-            },
+            columnVisibility,
             rowSelection,
             globalFilter,
         },
@@ -83,6 +100,7 @@ export function DataTable<TData, TValue = unknown>({
                 <div className="flex w-full justify-between">
                     <DataTableToolbar
                         table={table}
+                        actions={actions}
                         globalFilter={globalFilter}
                         setGlobalFilter={setGlobalFilter}
                         density={density}
@@ -90,6 +108,7 @@ export function DataTable<TData, TValue = unknown>({
                         searchQuery={searchQuery}
                         setSearchQuery={setSearchQuery}
                         renderFilter={renderFilter}
+                        onAction={onAction}
                     />
                 </div>
             </div>

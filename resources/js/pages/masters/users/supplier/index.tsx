@@ -1,18 +1,28 @@
-import { ActionColumn, ActionType } from '@/components/action-column';
+import { ActionColumn, type ActionType } from '@/components/action-column';
 import { DataTable } from '@/components/data-table';
 import { createSelectColumn } from '@/components/select-column';
 import { Calendar } from '@/components/ui/calendar';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { supplier } from '@/routes';
+import { master } from '@/routes';
+import { user } from '@/routes/master';
+import { supplier } from '@/routes/master/user';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import * as React from 'react';
 import { toast } from 'sonner';
-import { dataUserSupplier, schemaUserSupplier } from './data';
+import { dataUser, schemaUser } from '../data';
 
 const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Master',
+        href: master().url,
+    },
+    {
+        title: 'User',
+        href: user().url,
+    },
     {
         title: 'Supplier',
         href: supplier().url,
@@ -21,8 +31,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const actions: ActionType[] = ['add', 'view', 'edit', 'delete'];
 
-const columns: ColumnDef<schemaUserSupplier>[] = [
-    createSelectColumn<schemaUserSupplier>(),
+const columns: ColumnDef<schemaUser>[] = [
+    createSelectColumn<schemaUser>(),
     {
         accessorKey: 'id',
         header: 'Id',
@@ -45,7 +55,6 @@ const columns: ColumnDef<schemaUserSupplier>[] = [
         cell: ({ row }) => (
             <span className="capitalize">{row.getValue('role')}</span>
         ),
-        filterFn: 'includesValue',
     },
     {
         id: 'actions',
@@ -55,22 +64,22 @@ const columns: ColumnDef<schemaUserSupplier>[] = [
                 actions={actions}
                 onAction={(action, row) => {
                     if (action === 'view') {
-                        toast('View Supplier', {
-                            description: `Delete Supplier "${row.original.name}" action triggered`,
+                        toast('View User', {
+                            description: `Delete User "${row.original.name}" action triggered`,
                         });
-                        console.log('View Supplier', row.original);
+                        console.log('View User', row.original);
                     }
                     if (action === 'edit') {
-                        toast('Edit Supplier', {
-                            description: `Edit Supplier "${row.original.name}" action triggered`,
+                        toast('Edit User', {
+                            description: `Edit User "${row.original.name}" action triggered`,
                         });
-                        console.log('Edit Supplier', row.original);
+                        console.log('Edit User', row.original);
                     }
                     if (action === 'delete') {
-                        toast('Delete Supplier', {
-                            description: `Delete Supplier "${row.original.name}" action triggered`,
+                        toast('Delete User', {
+                            description: `Delete User "${row.original.name}" action triggered`,
                         });
-                        console.log('Delete Supplier', row.original);
+                        console.log('Delete user', row.original);
                     }
                 }}
             />
@@ -81,7 +90,7 @@ const columns: ColumnDef<schemaUserSupplier>[] = [
     },
 ];
 
-const data = dataUserSupplier;
+const data = dataUser;
 
 export default function Supplier() {
     const [date, setDate] = React.useState<Date | undefined>(new Date());
@@ -114,14 +123,16 @@ export default function Supplier() {
                         actions={actions}
                         onAction={(action) => {
                             if (action) {
-                                toast('Add Supplier', {
-                                    description:
-                                        'Add Supplier action triggered',
+                                toast('Add User', {
+                                    description: 'Add User action triggered',
                                 });
                             }
                         }}
                         initialState={{
-                            columnVisibility: { id: false, role: false },
+                            columnFilters: [
+                                { id: 'role', value: ['supplier'] },
+                            ],
+                            columnVisibility: { id: false },
                         }}
                     />
                 </div>

@@ -25,28 +25,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
             })->name('master.user');
 
             Route::get('admin', function () {
-                return Inertia::render('masters/users/admin');
+                return Inertia::render('masters/users/admin/index');
             })->name('master.user.admin');
 
             Route::get('sales', function () {
-                return Inertia::render('masters/users/sales');
+                return Inertia::render('masters/users/sales/index');
             })->name('master.user.sales');
 
             Route::get('supplier', function () {
-                return Inertia::render('masters/users/supplier');
+                return Inertia::render('masters/users/supplier/index');
             })->name('master.user.supplier');
 
             Route::get('customer', function () {
-                return Inertia::render('masters/users/customer');
+                return Inertia::render('masters/users/customer/index');
             })->name('master.user.customer');
         });
 
         Route::get('branch', function () {
-            return Inertia::render('masters/branch');
+            return Inertia::render('masters/branch/index');
         })->name('master.branch');
 
         Route::get('financial-year', function () {
-            return Inertia::render('masters/financial-year');
+            return Inertia::render('masters/financial-year/index');
         })->name('master.financial-year');
     });
 

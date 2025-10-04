@@ -1,50 +1,43 @@
 import { ActionColumn, ActionType } from '@/components/action-column';
+import { ColumnFilter } from '@/components/column-filter';
 import { DataTable } from '@/components/data-table';
 import { createSelectColumn } from '@/components/select-column';
 import { Calendar } from '@/components/ui/calendar';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { supplier } from '@/routes';
+import { master } from '@/routes';
+import { financialYear } from '@/routes/master';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import * as React from 'react';
 import { toast } from 'sonner';
-import { dataUserSupplier, schemaUserSupplier } from './data';
+import { dataFinancialYear, dataYears, schemaFinancialYear } from './data';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Supplier',
-        href: supplier().url,
+        title: 'Master',
+        href: master().url,
+    },
+    {
+        title: 'Financial Year',
+        href: financialYear().url,
     },
 ];
 
 const actions: ActionType[] = ['add', 'view', 'edit', 'delete'];
 
-const columns: ColumnDef<schemaUserSupplier>[] = [
-    createSelectColumn<schemaUserSupplier>(),
+const columns: ColumnDef<schemaFinancialYear>[] = [
+    createSelectColumn<schemaFinancialYear>(),
     {
         accessorKey: 'id',
         header: 'Id',
         meta: { exportable: true },
     },
     {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: 'year',
+        header: 'Year',
         meta: { exportable: true },
-    },
-    {
-        accessorKey: 'email',
-        header: 'Email',
-        meta: { exportable: true },
-    },
-    {
-        accessorKey: 'role',
-        header: 'Role',
-        meta: { exportable: true },
-        cell: ({ row }) => (
-            <span className="capitalize">{row.getValue('role')}</span>
-        ),
         filterFn: 'includesValue',
     },
     {
@@ -55,22 +48,22 @@ const columns: ColumnDef<schemaUserSupplier>[] = [
                 actions={actions}
                 onAction={(action, row) => {
                     if (action === 'view') {
-                        toast('View Supplier', {
-                            description: `Delete Supplier "${row.original.name}" action triggered`,
+                        toast('View Financial Year', {
+                            description: `Delete Financial Year "${row.original.year}" action triggered`,
                         });
-                        console.log('View Supplier', row.original);
+                        console.log('View Financial Year', row.original);
                     }
                     if (action === 'edit') {
-                        toast('Edit Supplier', {
-                            description: `Edit Supplier "${row.original.name}" action triggered`,
+                        toast('Edit Financial Year', {
+                            description: `Edit Financial Year "${row.original.year}" action triggered`,
                         });
-                        console.log('Edit Supplier', row.original);
+                        console.log('Edit Financial Year', row.original);
                     }
                     if (action === 'delete') {
-                        toast('Delete Supplier', {
-                            description: `Delete Supplier "${row.original.name}" action triggered`,
+                        toast('Delete Financial Year', {
+                            description: `Delete Financial Year "${row.original.year}" action triggered`,
                         });
-                        console.log('Delete Supplier', row.original);
+                        console.log('Delete Financial Year', row.original);
                     }
                 }}
             />
@@ -81,14 +74,14 @@ const columns: ColumnDef<schemaUserSupplier>[] = [
     },
 ];
 
-const data = dataUserSupplier;
+const data = dataFinancialYear;
 
-export default function Supplier() {
+export default function FinancialYear() {
     const [date, setDate] = React.useState<Date | undefined>(new Date());
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Supplier" />
+            <Head title="Financial Year" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     <div className="relative overflow-hidden rounded-xl border border-sidebar-border/70 px-5 py-3 dark:border-sidebar-border">
@@ -114,15 +107,25 @@ export default function Supplier() {
                         actions={actions}
                         onAction={(action) => {
                             if (action) {
-                                toast('Add Supplier', {
+                                toast('Add Financial Year', {
                                     description:
-                                        'Add Supplier action triggered',
+                                        'Add Financial Year action triggered',
                                 });
                             }
                         }}
                         initialState={{
-                            columnVisibility: { id: false, role: false },
+                            columnVisibility: { id: false },
                         }}
+                        renderFilter={(table) => (
+                            <>
+                                <ColumnFilter
+                                    table={table}
+                                    columnId="year"
+                                    title="Year"
+                                    options={dataYears}
+                                />
+                            </>
+                        )}
                     />
                 </div>
             </div>
