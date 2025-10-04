@@ -1,34 +1,39 @@
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { Table } from '@tanstack/react-table';
+import { DataTableFacetedFilter } from './data-table-faceted-filter';
+import { DropdownMenuLabel } from './ui/dropdown-menu';
 
 interface RoleFilterProps<TData> {
     table: Table<TData>;
 }
 
 export function RoleFilter<TData>({ table }: RoleFilterProps<TData>) {
-    const column = table.getColumn('role');
+    const roles = [
+        {
+            value: 'admin',
+            label: 'Admin',
+        },
+        {
+            value: 'sales',
+            label: 'Sales',
+        },
+        {
+            value: 'customer',
+            label: 'Customer',
+        },
+        {
+            value: 'supplier',
+            label: 'Supplier',
+        },
+    ];
 
     return (
-        <Select
-            value={(column?.getFilterValue() as string) ?? 'all'}
-            onValueChange={(val) => column?.setFilterValue(val)}
-        >
-            <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by role" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="Admin">Admin</SelectItem>
-                <SelectItem value="Sales">Sales</SelectItem>
-                <SelectItem value="Customer">Customer</SelectItem>
-                <SelectItem value="Supplier">Supplier</SelectItem>
-            </SelectContent>
-        </Select>
+        <div className="space-y-1">
+            <DropdownMenuLabel>Role Filter</DropdownMenuLabel>
+            <DataTableFacetedFilter
+                column={table.getColumn('role')}
+                title="Role"
+                options={roles}
+            />
+        </div>
     );
 }

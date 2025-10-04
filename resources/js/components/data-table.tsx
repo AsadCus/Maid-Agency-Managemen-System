@@ -12,6 +12,8 @@ import {
     ColumnFiltersState,
     flexRender,
     getCoreRowModel,
+    getFacetedRowModel,
+    getFacetedUniqueValues,
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
@@ -22,14 +24,13 @@ import {
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
-import { DataTableExport } from './data-table-export';
 import { DataTablePagination } from './data-table-pagination';
-import { DataTableSettings } from './data-table-settings';
+import { DataTableToolbar } from './data-table-toolbar';
 
 interface DataTableProps<TData, TValue = unknown> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    renderToolbar?: (
+    renderFilter?: (
         table: ReturnType<typeof useReactTable<TData>>,
     ) => React.ReactNode;
 }
@@ -37,7 +38,7 @@ interface DataTableProps<TData, TValue = unknown> {
 export function DataTable<TData, TValue = unknown>({
     columns,
     data,
-    renderToolbar,
+    renderFilter,
 }: DataTableProps<TData, TValue>) {
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -52,6 +53,17 @@ export function DataTable<TData, TValue = unknown>({
     const table = useReactTable({
         data,
         columns,
+        state: {
+            sorting,
+            columnFilters,
+            columnVisibility: {
+                id: false,
+                ...columnVisibility,
+            },
+            rowSelection,
+            globalFilter,
+        },
+        globalFilterFn: 'includesString',
         onColumnVisibilityChange: setColumnVisibility,
         onColumnFiltersChange: setColumnFilters,
         onSortingChange: setSorting,
@@ -61,125 +73,15 @@ export function DataTable<TData, TValue = unknown>({
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        globalFilterFn: 'includesString',
-        state: {
-            sorting,
-            columnFilters,
-            columnVisibility,
-            rowSelection,
-            globalFilter,
-        },
+        getFacetedRowModel: getFacetedRowModel(),
+        getFacetedUniqueValues: getFacetedUniqueValues(),
     });
 
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-2">
-                {/* <Input
-                    placeholder="Search..."
-                    value={globalFilter ?? ''}
-                    onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="max-w-[200px]"
-                />
-
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className="w-full max-w-[140px] justify-between"
-                        >
-                            <span className="flex items-center gap-2">
-                                <Columns3Icon />
-                                Columns
-                            </span>{' '}
-                            <ChevronDownIcon className="ml-3" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <div className="relative">
-                            <Input
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-8"
-                                placeholder="Search"
-                                onKeyDown={(e) => e.stopPropagation()}
-                            />
-                            <SearchIcon className="absolute inset-y-0 left-2 my-auto h-4 w-4" />
-                        </div>
-                        <DropdownMenuSeparator />
-                        {table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column) => {
-                                if (
-                                    searchQuery &&
-                                    !column.id
-                                        .toLowerCase()
-                                        .includes(searchQuery.toLowerCase())
-                                ) {
-                                    return null;
-                                }
-
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) =>
-                                            column.toggleVisibility(!!value)
-                                        }
-                                        onSelect={(e) => e.preventDefault()}
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                );
-                            })}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={() => {
-                                table.resetColumnVisibility();
-                                setSearchQuery('');
-                            }}
-                        >
-                            <RefreshCcwIcon /> Reset
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                <Select value={density} onValueChange={setDensity}>
-                    <SelectTrigger
-                        className="w-[140px]"
-                        aria-label="Density select"
-                    >
-                        <SelectValue placeholder="Density" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>Density</SelectLabel>
-                            <SelectItem value="compact">
-                                <div className="flex items-center gap-2">
-                                    <Rows4Icon className="h-4 w-4" />
-                                    Compact
-                                </div>
-                            </SelectItem>
-                            <SelectItem value="standard">
-                                <div className="flex items-center gap-2">
-                                    <Rows3Icon className="h-4 w-4" />
-                                    Standard
-                                </div>
-                            </SelectItem>
-                            <SelectItem value="flexible">
-                                <div className="flex items-center gap-2">
-                                    <Rows2Icon className="h-4 w-4" />
-                                    Flexible
-                                </div>
-                            </SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-
-                {renderToolbar?.(table)} */}
                 <div className="flex w-full justify-between">
-                    <DataTableSettings
+                    <DataTableToolbar
                         table={table}
                         globalFilter={globalFilter}
                         setGlobalFilter={setGlobalFilter}
@@ -187,10 +89,8 @@ export function DataTable<TData, TValue = unknown>({
                         setDensity={setDensity}
                         searchQuery={searchQuery}
                         setSearchQuery={setSearchQuery}
-                        renderToolbar={renderToolbar}
+                        renderFilter={renderFilter}
                     />
-
-                    <DataTableExport table={table} />
                 </div>
             </div>
 

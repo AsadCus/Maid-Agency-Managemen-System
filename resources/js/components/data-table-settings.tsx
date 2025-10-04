@@ -33,7 +33,7 @@ interface DataTableSettingsProps<TData> {
     setDensity: (value: string) => void;
     searchQuery: string;
     setSearchQuery: (value: string) => void;
-    renderToolbar?: (table: Table<TData>) => React.ReactNode;
+    renderFilter?: (table: Table<TData>) => React.ReactNode;
 }
 
 export function DataTableSettings<TData>({
@@ -44,7 +44,7 @@ export function DataTableSettings<TData>({
     setDensity,
     searchQuery,
     setSearchQuery,
-    renderToolbar,
+    renderFilter,
 }: DataTableSettingsProps<TData>) {
     return (
         <DropdownMenu>
@@ -60,7 +60,13 @@ export function DataTableSettings<TData>({
                 className="w-full max-w-[600px] p-4"
                 align="start"
             >
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div
+                    className={`grid gap-4 ${
+                        renderFilter
+                            ? 'grid-cols-1 md:grid-cols-2'
+                            : 'grid-cols-1'
+                    }`}
+                >
                     <div className="space-y-4">
                         {/* Search */}
                         <div className="space-y-1">
@@ -79,7 +85,7 @@ export function DataTableSettings<TData>({
                         </div>
 
                         {/* Columns */}
-                        <div className="space-y-1 border-t">
+                        <div className="space-y-1">
                             <DropdownMenuLabel>Columns</DropdownMenuLabel>
                             <div className="relative">
                                 <Input
@@ -145,7 +151,7 @@ export function DataTableSettings<TData>({
                         </div>
 
                         {/* Density */}
-                        <div className="space-y-1 border-t">
+                        <div className="space-y-1">
                             <DropdownMenuLabel>Density</DropdownMenuLabel>
                             <Select value={density} onValueChange={setDensity}>
                                 <SelectTrigger className="w-full">
@@ -176,10 +182,9 @@ export function DataTableSettings<TData>({
                     </div>
 
                     {/* Filters */}
-                    {renderToolbar && (
-                        <div className="space-y-1 border-t md:border-t-0 md:border-l md:pl-4">
-                            <DropdownMenuLabel>Filters</DropdownMenuLabel>
-                            {renderToolbar(table)}
+                    {renderFilter && (
+                        <div className="space-y-4 md:border-l md:pl-4">
+                            {renderFilter(table)}
                         </div>
                     )}
                 </div>

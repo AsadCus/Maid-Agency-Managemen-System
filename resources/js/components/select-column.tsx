@@ -22,6 +22,7 @@ export const selectColumn: ColumnDef<any> = {
             aria-label="Select row"
         />
     ),
+    meta: { exportable: false },
     enableSorting: false,
     enableHiding: false,
 };
